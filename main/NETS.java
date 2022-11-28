@@ -72,37 +72,43 @@ public class NETS {
 		
 		int[] dimWeights = new int[dim];
 		dimWeights = getDimWeights(dimWeights, dimSize);
-		
-		
-		
+				
 		/* Cell size calculation for sub dimensions*/
 		if (subDimFlag) {
-			double minSubDimSize = Integer.MAX_VALUE;
-			double[] subDimSize = new double[subDim];
-			for(int i=0;i<subDim;i++) {
-				subDimSize[i] = maxValues[i] - minValues[i]; 
-				if(subDimSize[i] <minSubDimSize) minSubDimSize = subDimSize[i];
-			}
-			
-			double subDimWeightsSum = 0;
-			int[] subDimWeights = new int[subDim];
-			for(int i=0;i<subDim;i++) {    
-				//subDimWeights[i] = subDimSize[i]/minSubDimSize; //relative-weight
-				subDimWeights[i] = 1; //equal-weight
-				subDimWeightsSum+=subDimWeights[i];
-			}
-			
-			subDimLength = new double[subDim];
-			double[] subDimgapCount = new double[subDim];
-			for(int i = 0;i<subDim;i++) {   
-				subDimLength[i] = getSquareRoot(R*R*subDimWeights[i]/subDimWeightsSum);
-				subDimgapCount[i] = getNearestDouble(subDimSize[i]/subDimLength[i]);
-				subDimSize[i] = subDimgapCount[i]*subDimLength[i];
-			}
+			calcSubDimDetails();
 		}
-
 	}
 	
+	private void calcSubDimDetails() {
+		double[] subDimSize = new double[subDim];
+		subDimSize = getSubDimSize(subDimSize);
+		
+		double subDimWeightsSum = 0;
+		int[] subDimWeights = new int[subDim];
+		for(int i=0;i<subDim;i++) {    
+			//subDimWeights[i] = subDimSize[i]/minSubDimSize; //relative-weight
+			subDimWeights[i] = 1; //equal-weight
+			subDimWeightsSum+=subDimWeights[i];
+		}
+		
+		subDimLength = new double[subDim];
+		double[] subDimgapCount = new double[subDim];
+		for(int i = 0;i<subDim;i++) {   
+			subDimLength[i] = getSquareRoot(R*R*subDimWeights[i]/subDimWeightsSum);
+			subDimgapCount[i] = getNearestDouble(subDimSize[i]/subDimLength[i]);
+			subDimSize[i] = subDimgapCount[i]*subDimLength[i];
+		}
+	}
+
+	private double[] getSubDimSize(double[] subDimSize) {
+		double minSubDimSize = Integer.MAX_VALUE;
+		for(int i=0;i<subDim;i++) {
+			subDimSize[i] = maxValues[i] - minValues[i]; 
+			if(subDimSize[i] <minSubDimSize) minSubDimSize = subDimSize[i];
+		}
+		return null;
+	}
+
 	private int[] getDimWeights(int[] dimWeights, double[] dimSize) {
 		double dimWeightsSum = 0;
 		for(int i=0;i<dim;i++) {   
