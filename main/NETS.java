@@ -86,7 +86,6 @@ public class NETS {
 		double subDimWeightsSum = 0;
 		int[] subDimWeights = new int[subDim];
 		for(int i=0;i<subDim;i++) {    
-			//subDimWeights[i] = subDimSize[i]/minSubDimSize; //relative-weight
 			subDimWeights[i] = 1; //equal-weight
 			subDimWeightsSum+=subDimWeights[i];
 		}
@@ -106,7 +105,7 @@ public class NETS {
 			subDimSize[i] = maxValues[i] - minValues[i]; 
 			if(subDimSize[i] <minSubDimSize) minSubDimSize = subDimSize[i];
 		}
-		return null;
+		return subDimSize;
 	}
 
 	private int[] getDimWeights(int[] dimWeights, double[] dimSize) {
