@@ -37,7 +37,7 @@ public class Tuple{
 			
 			while (it.hasNext()) {
 				int slideIDKey = it.next();
-				if (slideIDKey <= itr-nS) {
+				if (itr-nS>= slideIDKey ) {
 					nnUnSafeOut -= unSafeOutNeighbors.get(slideIDKey);
 					it.remove();
 				}
