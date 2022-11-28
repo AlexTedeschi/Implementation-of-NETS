@@ -1,4 +1,4 @@
-package src.utils;
+package utils;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -9,7 +9,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import src.main.Tuple;
+import main.Tuple;
 
 public class StreamGenerator {
 	private double[] maxValues;

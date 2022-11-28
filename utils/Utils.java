@@ -1,4 +1,4 @@
-package src.utils;
+package utils;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;

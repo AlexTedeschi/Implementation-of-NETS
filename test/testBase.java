@@ -1,15 +1,15 @@
-package src.test;
+package test;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import src.main.NETS;
-import src.utils.StreamGenerator;
-import src.main.Tuple;
-import src.utils.MeasureMemoryThread;
-import src.utils.Utils;
+import main.NETS;
+import utils.StreamGenerator;
+import main.Tuple;
+import utils.MeasureMemoryThread;
+import utils.Utils;
 
 public class testBase {
 	public static String dataset ="EM";

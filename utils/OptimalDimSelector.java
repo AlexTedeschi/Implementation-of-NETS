@@ -1,10 +1,10 @@
-package src.utils;
+package utils;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import src.main.NETS;
-import src.main.Tuple;
-import src.utils.StreamGenerator;
+import main.NETS;
+import main.Tuple;
+import utils.StreamGenerator;
 
 public class OptimalDimSelector {
 	public static void main(String[] args) throws IOException {

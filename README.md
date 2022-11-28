@@ -29,3 +29,8 @@ We are currently trying to implement the NETS algorithm in JAVA and run on **JDK
 --D: the number of full dimensions (integer)
 --sD: the number of sub dimensions (integer)
 --nW: the number of windows (integer)
+
+## 5. Compilation and Running:
+From the root directory of the project run: javac .\test\testBase.java
+Sample usage after compilation: java test.testBase --dataset TAO --W 10000 --S 500 --R 1.9 --K 50 --D 3 --sD 3 --nW 1
+Parameters for running can be changed accordingly

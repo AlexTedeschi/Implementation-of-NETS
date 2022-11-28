@@ -1,11 +1,11 @@
-package src.utils;
+package utils;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import src.utils.StreamGenerator;
-import src.main.Tuple;
+import utils.StreamGenerator;
+import main.Tuple;
 
 public class Prioritizer {
 	public static void main(String[] args) throws IOException {
