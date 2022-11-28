@@ -16,22 +16,23 @@ public class OptimalDimSelector {
 		int W = 100000; // sliding size, default = 10000(FC, TAO), 100000(Otherwise)
 		int nS = W/S;
 		int nW = 1;
+		int zero = 0;
 				
 		windowLoop:
-		for(int j = 0; j < nW; j++) {
+		for(int j = zero; j < nW; j++) {
 		System.out.println("Window"+j);
 		double minTEC = Double.MAX_VALUE;
-		int optSD = 0;
+		int optSD = zero;
 		
 		dimLoop:
 		for(int subDim = 1; subDim <= dim; subDim++) {
 			StreamGenerator sg = new StreamGenerator(dataset,0);
 			NETS detector = new NETS(dim, subDim, R, K, S, W, nW, sg.getMaxValues(), sg.getMinValues());
 			
-			for(int i = 0; i< nS+nW+j ; i++) {
+			for(int i = zero; i< nS+nW+j ; i++) {
 				ArrayList<Tuple> slideIn = sg.getNewSlideTuples(i, S);
 				detector.calcNetChange(slideIn, i);
-				if(i>=nS+j) {
+				if(nS+j<=i) {
 					
 					detector.getInfCellIndices();
 	
@@ -49,7 +50,16 @@ public class OptimalDimSelector {
 					
 					System.out.println(TEC);
 
-					if(TEC < minTEC) {
+					if(minTEC < TEC) {
+						if(dim > subDim) {
+						subDim = dim-1;
+						continue dimLoop;
+					}
+						System.out.println("Window "+j+"/ TEC "+minTEC+ "/ Sub-dim chosen: " +optSD);
+						continue windowLoop;
+
+					}
+					else {
 						minTEC = TEC;
 						optSD = subDim;
 						if(subDim == dim) {
@@ -57,13 +67,6 @@ public class OptimalDimSelector {
 							continue windowLoop;
 						}
 						continue dimLoop;
-					}else {
-						if(subDim < dim) {
-							subDim = dim-1;
-							continue dimLoop;
-						}
-						System.out.println("Window "+j+"/ TEC "+minTEC+ "/ Sub-dim chosen: " +optSD);
-						continue windowLoop;						
 						//continue dimLoop;
 					}
 				}
