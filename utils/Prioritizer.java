@@ -70,7 +70,7 @@ public class Prioritizer {
     static double getMax(ArrayList<Double> data) {
         double max = Double.MIN_VALUE;
         for(double a : data) {
-        	if(a>max) max = a;
+        	if(max<a) max = a;
         }
         return max;
     }
@@ -78,7 +78,7 @@ public class Prioritizer {
     static double getMin(ArrayList<Double> data) {
         double min = Double.MAX_VALUE;
         for(double a : data) {
-        	if(a<min) min = a;
+        	if(min>a) min = a;
         }
         return min;
     }
