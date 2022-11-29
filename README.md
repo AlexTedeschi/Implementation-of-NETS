@@ -15,10 +15,10 @@ This paper addresses the problem of efficiently detecting outliers from a data s
 | FC      | 1M             | 55       |  72.2MB  |[link](https://fsu-my.sharepoint.com/:x:/g/personal/jr21bg_fsu_edu/Ef_89zQEDvxPr0OWN6EAawQBpFM-a1PZOJA2fI9yBURQ2Q?email=sjacobchacko%40fsu.edu&e=X1uuKO) |
 
 ## 3. Configuration
-We currently implemented the NETS algorithm in JAVA and run on **JDK 17.0.4.1.**.
-Code from utilities and non algorithm functions was brought over from the original implementation of NETS.
-Certain printouts, variables, and constructors were eliminated to improve time.
-Main algorithms were recoded in the NETS.java.
+- We currently implemented the NETS algorithm in JAVA and run on **JDK 17.0.4.1.**. \
+- Code from utilities and non algorithm functions was brought over from the original implementation of NETS. \
+- Certain printouts, variables, and constructors were eliminated to improve time. \
+- Main algorithms were recoded in the NETS.java. \
 
 ## 4. Proposed Parameters
 ```
@@ -32,10 +32,10 @@ Main algorithms were recoded in the NETS.java.
 --nW: the number of windows (integer)
 ```
 ## 5. Compilation and Running:
-From the root directory of the project run: javac .\test\testBase.java
-Sample usage after compilation: java test.testBase --dataset TAO --W 10000 --S 500 --R 1.9 --K 50 --D 3 --sD 3 --nW 1
-Datasets available in the repo: GAU, STK and TAO
-Other datasets: HPC and FC (these datasets are not included in the repo as they exceed the size limit of the repository. The links to download these datasets are in the table above). These datasets once downloaded and placed in the datasets folder can be used by specifying either HPC or FC in the command above.
-For GAU and STK, D value should be 1, for TAO, D value should be 3, for HPC, D should be 7 and for FC, D should be 55.
-Other parameters for running can be changed accordingly.
-Testing is done on Florida State Universities Computer Science Departments servers
+- From the root directory of the project run: javac .\test\testBase.java \
+- Sample usage after compilation: java test.testBase --dataset TAO --W 10000 --S 500 --R 1.9 --K 50 --D 3 --sD 3 --nW 1 \
+- Datasets available in the repo: GAU, STK and TAO \
+- Other datasets: HPC and FC (these datasets are not included in the repo as they exceed the size limit of the repository. The links to download these datasets are in the table above). These datasets once downloaded and placed in the datasets folder can be used by specifying either HPC or FC in the command above. \
+- For GAU and STK, D value should be 1, for TAO, D value should be 3, for HPC, D should be 7 and for FC, D should be 55. \
+- Other parameters for running can be changed accordingly. \
+- Testing is done on Florida State Universities Computer Science Departments servers \
