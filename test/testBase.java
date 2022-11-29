@@ -23,9 +23,7 @@ public class testBase {
 	public static int W = 10000; // sliding size, default = 10000(FC, TAO), 100000(Otherwise)
 	public static int nS = W/S;
 	public static int nW = 1;
-	public static BufferedWriter fw;
-	public static String printType = "Console";
-	
+
 	public static double allTimeSum = 0;
 	public static double peakMemory = 0; 
 		
@@ -40,9 +38,6 @@ public class testBase {
 		
 		if(args.length > 0){
 			String fileName = "Result/Result_"+dataset+"_"+method+"_D"+dim+"_sD"+subDim+"_rand"+randSubDim+"_R"+R+"_K"+K+"_S"+S+"_W"+W+"_nW"+nW+".txt";
-			fw = new BufferedWriter(new FileWriter(fileName, true));
-			// printType = "File";
-			printType = "Console";
 		}
 		
 	/* Simulate sliding windows */
@@ -58,21 +53,19 @@ public class testBase {
 			
 			// Save CPU time & Peak memory
 			if(itr>=nS-1) {
-				// if (printType =="File") fw.write("At window " +(itr-nS+1)+", "+"# outliers: "+detector.outliers.size()+"\n");
-				if (printType =="Console") System.out.println("At window " +(itr-nS+1)+", "+"# outliers: "+detector.outliers.size());
+				System.out.println("At window " +(itr-nS+1)+", "+"# outliers: "+detector.outliers.size());
 				allTimeSum += ((endTime-startTime)/100000)/10000d;
 				peakMemory = (mesureThread.maxMemory/100000)/10d;
 			}
 			itr++;
 		} while(itr <nW+nS-1);
 		
-		printInfo(itr, dataset, detector.dimLength, detector.subDimLength, printType);
+		printInfo(itr, dataset, detector.dimLength, detector.subDimLength);
 		mesureThread.stop();
 	}
 	
-	public static void printInfo(int itr, String dataset, double[] dimLength, double[] subDimLength, String type) throws IOException {		
+	public static void printInfo(int itr, String dataset, double[] dimLength, double[] subDimLength) throws IOException {		
 		/* Print Information */
-		if(type == "Console") {
 			System.out.println("# Dataset: "+dataset);
 			System.out.println("Method: "+method);
 			System.out.println("Dim: "+dim);
@@ -82,18 +75,6 @@ public class testBase {
 			// System.out.println("Avg CPU time(s): " + allTimeSum/(itr-nS+1));
 			System.out.println("Avg CPU time(s): " + String.format("%.8f", allTimeSum/(itr-nS+1)) );
 			System.out.println("Peak memory(MB): "+peakMemory);
-		}else if (type =="File") {
-			fw.write("# Dataset: "+dataset+"\n");
-			fw.write("Method: "+method+"\n");
-			fw.write("Dim: "+dim+"\n");
-			fw.write("subDim: "+subDim+"\n");
-			fw.write("R/K/W/S: "+R+"/"+K+"/"+W+"/"+S+"\n");
-			fw.write("# of windows: "+(itr-nS+1)+"\n");
-			fw.write("Avg CPU time(s) \t Peak memory(MB)"+"\n");
-			fw.write(allTimeSum/(itr-nS+1)+"\t"+peakMemory+"\n");
-			fw.flush();
-			fw.close();
-		}
 	}
 
 	public static void loadArgs(String[] args) {
