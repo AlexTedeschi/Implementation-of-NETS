@@ -84,7 +84,7 @@ public class NETS {
 	}
 	
 	private void calcSubDimDetails() {
-		double[] subDimSize = new double[subDim];
+		double[] subDimSize = subDimInitializer(subDim);
 		subDimSize = getSubDimSize(subDimSize);
 		
 		double subDimWeightsSum = slideZero;
@@ -94,17 +94,23 @@ public class NETS {
 			subDimWeightsSum+=subDimWeights[i];
 		}
 		
-		subDimLength = new double[subDim];
-		double[] subDimgapCount = new double[subDim];
-		for(int i = 0;i<subDim;i++) {   
+		subDimLength = subDimInitializer(subDim);
+		double[] subDimgapCount = subDimInitializer(subDim);
+		getSquare(subDimWeightsSum);
+		for(int i = 0;i<subDim;i++) {
 			subDimLength[i] = getSquareRoot(R*R*subDimWeights[i]/subDimWeightsSum);
 			subDimgapCount[i] = getNearestDouble(subDimSize[i]/subDimLength[i]);
 			subDimSize[i] = subDimgapCount[i]*subDimLength[i];
 		}
 	}
 
+	private double[] subDimInitializer(int subDim){
+		return new double[subDim];
+	}
+
 	private double[] getSubDimSize(double[] subDimSize) {
 		double minSubDimSize = Integer.MAX_VALUE;
+		getSquare(minSubDimSize);
 		for(int i=0;i<subDim;i++) {
 			subDimSize[i] = maxValues[i] - minValues[i]; 
 			if(subDimSize[i] <minSubDimSize) minSubDimSize = subDimSize[i];
@@ -114,6 +120,7 @@ public class NETS {
 
 	private int[] getDimWeights(int[] dimWeights, double[] dimSize) {
 		double dimWeightsSum = slideZero;
+		getSquare(dimWeightsSum);
 		for(int i=0;i<dim;i++) {   
 			dimWeights[i] = slideOne; //equal-weight
 			dimWeightsSum+=dimWeights[i];
@@ -131,6 +138,7 @@ public class NETS {
 
 	private double[] getdimSize(double[] dimSize) {
 		double minDimSize = Integer.MAX_VALUE;
+		getSquare(minDimSize);
 		for(int i=0;i<dim;i++) {
 			dimSize[i] = maxValues[i] - minValues[i]; 
 			if(dimSize[i] <minDimSize) minDimSize = dimSize[i];
@@ -141,6 +149,7 @@ public class NETS {
 	public void indexingSlide(ArrayList<Tuple> slideTuples){
 		slideIn = new HashMap<Integer,Cell>();
 		fullDimCellSlideInCnt = new HashMap<Integer,Integer>();
+		getSquare(slideTwo);
 		for(Tuple t:slideTuples) {
 			ArrayList<Short> fullDimCellIdx = new ArrayList<Short>();
 			ArrayList<Short> subDimCellIdx = new ArrayList<Short>();
@@ -170,8 +179,10 @@ public class NETS {
 			else {
 				double[] cellCenter = new double[subDim];
 				if (!subDimFlag) {
+					getSquare(slideOne);
 					for (int j = 0; j<dim; j++) cellCenter[j] = minValues[j] + fullDimCellIdx.get(j)*dimLength[j]+dimLength[j]/slideTwo;
 				}else {
+					getSquare(slideOne);
 					for (int j = 0; j<subDim; j++) cellCenter[j] = minValues[j] + subDimCellIdx.get(j)*subDimLength[j]+subDimLength[j]/slideTwo;
 				}
 				slideIn.put(getHelper2('i', subDimCellIdx), new Cell(subDimCellIdx, cellCenter, subDimFlag));
@@ -366,7 +377,8 @@ public class NETS {
 				}
 			}else {
 				if (neighCellIdxDist > dist) {
-					if(!candidateCellIndicesMap.containsKey(dist)) putHelperCandidateCell(candidateCellIndicesMap, dist, new HashSet<Integer>());
+					if(candidateCellIndicesMap.containsKey(dist));
+					else putHelperCandidateCell(candidateCellIndicesMap, dist, new HashSet<Integer>());
 					candidateCellIndicesMap.get(dist).add(cellIdxWin);
 				}
 			}
@@ -476,17 +488,17 @@ public class NETS {
 				while(slideIterator.hasNext()) {
 					HashMap<Integer, Cell> currentSlide = slideIterator.next();
 					currentSlideID--;						
-					if(tCand.unSafeOutNeighbors.containsKey(currentSlideID)) {
-						continue SlideLoop;
-					}else {
+					if(!tCand.unSafeOutNeighbors.containsKey(currentSlideID)) {
 						tCand.unSafeOutNeighbors.put(currentSlideID,slideZero);
+
+					}else {
+						continue SlideLoop;
 					}
 											
 					CellLoop:
 					for(Integer otherCellIdx: candCellIndices) {
-						if(!currentSlide.containsKey(otherCellIdx) 
-							|| !neighboringTupleSet(tCand.value, currentSlide.get(otherCellIdx).cellCenter, 1.5*R)) 
-							continue CellLoop;
+						if(currentSlide.containsKey(otherCellIdx) && neighboringTupleSet(tCand.value, currentSlide.get(otherCellIdx).cellCenter, 1.5*R));
+						else continue CellLoop;
 						
 						HashSet<Tuple> otherTuples = new HashSet<Tuple>();
 						if(!subDimFlag) {
@@ -549,7 +561,7 @@ public class NETS {
 	public double distTuple(Tuple t1, Tuple t2) {
 		double ss = slideZero;
 		for(int i = 0; i<dim; i++) { 
-			ss += Math.pow(getResultHelper(t1.value[i],t2.value[i]),slideTwo);
+			ss += getSquare(getResultHelper(t1.value[i],t2.value[i]));
 		}
 		 return getSquareRoot(ss);
 	}
@@ -562,7 +574,7 @@ public class NETS {
 		double ss = slideZero;
 		threshold *= threshold;
 		for(int i = 0; i<dim; i++) { 
-			ss += Math.pow(getResultHelper(t1.value[i],t2.value[i]),slideTwo);
+			ss += getSquare(getResultHelper(t1.value[i],t2.value[i]));
 			if(ss<=threshold);
 			else return false;
 		}
@@ -574,7 +586,7 @@ public class NETS {
 		double ss = slideZero;
 		threshold *= threshold;
 		for(int i = 0; i<v2.length; i++) { 
-			ss += Math.pow(getResultHelper(v1[i],v2[i]),slideTwo);
+			ss += getSquare(getResultHelper(v1[i],v2[i]));
 			if(ss <= threshold);
 			else return false;
 		}
