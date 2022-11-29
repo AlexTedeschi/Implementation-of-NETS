@@ -1,6 +1,7 @@
 package main;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -38,8 +39,11 @@ public class NETS {
 	public Queue<HashMap<Integer,Integer>> fullDimCellSlidesCnt; 
 	public HashSet<Integer> influencedCells;
 	
-	public int candidateCellsTupleCnt = 0;
-		
+	int slideZero = 0;
+	int slideOne = 1;
+	int slideTwo = 2;
+	public int candidateCellsTupleCnt = slideZero;
+	
 	public NETS(int dim, int subDim, double R, int K, int S, int W, int nW, double[] maxValues, double[] minValues) {
 		this.dim = dim;
 		this.subDim = subDim;
@@ -50,8 +54,8 @@ public class NETS {
 		this.W = W;
 		this.nW = nW;
 		this.nS = W/S;
-		this.neighCellIdxDist = getSquareRoot(subDim)*2;
-		this.neighCellFullDimIdxDist = getSquareRoot(dim)*2;
+		this.neighCellIdxDist = getSquareRoot(subDim)*slideTwo;
+		this.neighCellFullDimIdxDist = getSquareRoot(dim)*slideTwo;
 		this.maxValues = maxValues;
 		this.minValues = minValues;
 		
@@ -83,10 +87,10 @@ public class NETS {
 		double[] subDimSize = new double[subDim];
 		subDimSize = getSubDimSize(subDimSize);
 		
-		double subDimWeightsSum = 0;
+		double subDimWeightsSum = slideZero;
 		int[] subDimWeights = new int[subDim];
 		for(int i=0;i<subDim;i++) {    
-			subDimWeights[i] = 1; //equal-weight
+			subDimWeights[i] = slideOne; //equal-weight
 			subDimWeightsSum+=subDimWeights[i];
 		}
 		
@@ -109,9 +113,9 @@ public class NETS {
 	}
 
 	private int[] getDimWeights(int[] dimWeights, double[] dimSize) {
-		double dimWeightsSum = 0;
+		double dimWeightsSum = slideZero;
 		for(int i=0;i<dim;i++) {   
-			dimWeights[i] = 1; //equal-weight
+			dimWeights[i] = slideOne; //equal-weight
 			dimWeightsSum+=dimWeights[i];
 		}
 
@@ -140,114 +144,180 @@ public class NETS {
 		for(Tuple t:slideTuples) {
 			ArrayList<Short> fullDimCellIdx = new ArrayList<Short>();
 			ArrayList<Short> subDimCellIdx = new ArrayList<Short>();
-			for (int j = 0; j<dim; j++) { 
-				short dimIdx = (short) ((t.value[j]-minValues[j])/dimLength[j]);
-				fullDimCellIdx.add(dimIdx);
-			}
-			if (subDimFlag) {
-				for (int j = 0; j<subDim; j++) {
-					short dimIdx = (short) ((t.value[j]-minValues[j])/subDimLength[j]);
-					subDimCellIdx.add(dimIdx);
-				}
-			}else {
+			fullDimCellIdx = getFullDimCellIdx(fullDimCellIdx,t);
+			if (!subDimFlag) {
 				subDimCellIdx = fullDimCellIdx;
+			}else {
+				subDimCellIdx = getSubDimCellIdx(subDimCellIdx, t);
 			}
 
 			t.fullDimCellIdx = fullDimCellIdx;
 			t.subDimCellIdx = subDimCellIdx;
 			
-			if(!idxEncoder.containsKey(fullDimCellIdx)) {
+			if(idxEncoder.containsKey(fullDimCellIdx));		
+			else{
 				int id = idxEncoder.size(); 
 				idxEncoder.put(fullDimCellIdx, id);
 				idxDecoder.put(id, fullDimCellIdx);
 			}
-			if(!idxEncoder.containsKey(subDimCellIdx)) {
+			if(idxEncoder.containsKey(subDimCellIdx));
+			else {
 				int id = idxEncoder.size(); 
 				idxEncoder.put(subDimCellIdx, id);
 				idxDecoder.put(id, subDimCellIdx);
 			}
-			if(!slideIn.containsKey(idxEncoder.get(subDimCellIdx))) {
+			if(slideIn.containsKey(getHelper2('i', subDimCellIdx)));
+			else {
 				double[] cellCenter = new double[subDim];
-				if (subDimFlag) {
-					for (int j = 0; j<subDim; j++) cellCenter[j] = minValues[j] + subDimCellIdx.get(j)*subDimLength[j]+subDimLength[j]/2;
+				if (!subDimFlag) {
+					for (int j = 0; j<dim; j++) cellCenter[j] = minValues[j] + fullDimCellIdx.get(j)*dimLength[j]+dimLength[j]/slideTwo;
 				}else {
-					for (int j = 0; j<dim; j++) cellCenter[j] = minValues[j] + fullDimCellIdx.get(j)*dimLength[j]+dimLength[j]/2;
+					for (int j = 0; j<subDim; j++) cellCenter[j] = minValues[j] + subDimCellIdx.get(j)*subDimLength[j]+subDimLength[j]/slideTwo;
 				}
-				slideIn.put(idxEncoder.get(subDimCellIdx), new Cell(subDimCellIdx, cellCenter, subDimFlag));
+				slideIn.put(getHelper2('i', subDimCellIdx), new Cell(subDimCellIdx, cellCenter, subDimFlag));
 			}
-			slideIn.get(idxEncoder.get(subDimCellIdx)).addTuple(t, subDimFlag);
+			slideIn.get(getHelper2('i', subDimCellIdx)).addTuple(t, subDimFlag);
 			
-			if(!fullDimCellSlideInCnt.containsKey(idxEncoder.get(fullDimCellIdx))) {
-				fullDimCellSlideInCnt.put(idxEncoder.get(fullDimCellIdx), 0);
+			if(fullDimCellSlideInCnt.containsKey(getHelper2('i', fullDimCellIdx)));
+			else {
+				fullDimCellSlideInCnt.put(getHelper2('i', fullDimCellIdx), slideZero);
 			}
-			fullDimCellSlideInCnt.put(idxEncoder.get(fullDimCellIdx), fullDimCellSlideInCnt.get(idxEncoder.get(fullDimCellIdx))+1);
+			fullDimCellSlideInCnt.put(getHelper2('i', fullDimCellIdx), fullDimCellSlideInCnt.get(getHelper2('i', fullDimCellIdx))+slideOne);
 		}
 		
 		slides.add(slideIn);
 		fullDimCellSlidesCnt.add(fullDimCellSlideInCnt);
 	}
 	
+	private ArrayList<Short> getSubDimCellIdx(ArrayList<Short> subDimCellIdx, Tuple t) {
+		for (int j = 0; j<subDim; j++) {
+			short dimIdx = (short) ((t.value[j]-minValues[j])/subDimLength[j]);
+			subDimCellIdx.add(dimIdx);
+		}
+		return subDimCellIdx;
+	}
+
+	private ArrayList<Short> getFullDimCellIdx(ArrayList<Short> fullDimCellIdx, Tuple t) {
+		for (int j = 0; j<dim; j++) { 
+			short dimIdx = (short) ((t.value[j]-minValues[j])/dimLength[j]);
+			fullDimCellIdx.add(dimIdx);
+		}
+		return fullDimCellIdx;
+	}
+
 	public void calcNetChange(ArrayList<Tuple> slideTuples, int itr) {
 		this.indexingSlide(slideTuples);
 		
 		/* Slide out */
-		if(itr>nS-1) {
-			slideOut = slides.poll();
-			fullDimCellSlideOutCnt = fullDimCellSlidesCnt.poll();
+		int slideNum = nS-slideOne;
+		if(slideNum < itr) {
+			slideOut = pollSlides(slides);
+			fullDimCellSlideOutCnt = pollFullDimCellSlidesCnt(fullDimCellSlidesCnt);
 		}
 		slideDelta = new HashMap<Integer, Integer>();
 				
 		/* Update window */
 		for(Integer key:slideIn.keySet()) {
-			if(!windowCnt.containsKey(key)) {
-				windowCnt.put(key, 0);
-				idxDecoder.put(key, slideIn.get(key).cellIdx);
+			if(windowCnt.containsKey(key));
+			else {
+				putHelper('w',key, slideZero);
+				putHelper('i', key, slideIn.get(key).cellIdx);
 			}
-			windowCnt.put(key, windowCnt.get(key)+ slideIn.get(key).getNumTuples());
-			slideDelta.put(key, slideIn.get(key).getNumTuples());
+			putHelper('w',key, windowCnt.get(key)+ slideIn.get(key).getNumTuples());
+			putHelper('s', key, slideIn.get(key).getNumTuples());
+			
 		}
 		
 		for(Integer key:slideOut.keySet()) {
-			windowCnt.put(key, windowCnt.get(key)-slideOut.get(key).getNumTuples());
-			if(windowCnt.get(key) < 1) {
-				windowCnt.remove(key);
+			putHelper('w', key, windowCnt.get(key)-slideOut.get(key).getNumTuples());
+			if(slideOne > windowCnt.get(key)) {
+				removeHelper('w', key);
 			}
 			
-			if(slideDelta.containsKey(key)) {
-				slideDelta.put(key, slideDelta.get(key)-slideOut.get(key).getNumTuples());
+			if(!slideDelta.containsKey(key)) {
+				putHelper('s', key, slideOut.get(key).getNumTuples()*-slideOne);
 			}else {
-				slideDelta.put(key, slideOut.get(key).getNumTuples()*-1);
+				putHelper('s', key, slideDelta.get(key)-slideOut.get(key).getNumTuples());
 			}
 		}
 		
 		/* Update all Dim cell window count */
 		for(Integer key:fullDimCellSlideInCnt.keySet()) {
 			if(!fullDimCellWindowCnt.containsKey(key)) {
-				fullDimCellWindowCnt.put(key, 0);
+				putHelper('f', key, slideZero);
 			}
-			fullDimCellWindowCnt.put(key, fullDimCellWindowCnt.get(key) + fullDimCellSlideInCnt.get(key));
+			putHelper('f', key, fullDimCellWindowCnt.get(key) + fullDimCellSlideInCnt.get(key));
 		}
 		
 		for(Integer key:fullDimCellSlideOutCnt.keySet()) {
-			fullDimCellWindowCnt.put(key, fullDimCellWindowCnt.get(key) - fullDimCellSlideOutCnt.get(key));
-			if(fullDimCellWindowCnt.get(key) < 1) {
-				fullDimCellWindowCnt.remove(key);
+			putHelper('f', key, fullDimCellWindowCnt.get(key) - fullDimCellSlideOutCnt.get(key));
+			if(fullDimCellWindowCnt.get(key) < slideOne) {
+				removeHelper('f', key);
 			}
 		}
 	}
 	
-	
+	private void removeHelper(char c, Integer key) {
+		switch (c){
+			case 'f':
+				fullDimCellWindowCnt.remove(key);
+				break;
+			case 'w':
+				windowCnt.remove(key);
+				break;
+		}
+	}
+
+	private void putHelper(char c, Integer key, ArrayList<Short> cellIdx) {
+		if(c == 'i'){
+			idxDecoder.put(key,cellIdx);
+		}
+	}
+
+	private void putHelper(char c, Integer key, int num) {
+		switch(c){
+			case 'w':
+				windowCnt.put(key, num);
+				break;
+			case 's':
+				slideDelta.put(key, num);
+				break;
+			case 'f':
+				fullDimCellWindowCnt.put(key, num);
+				break;
+		}
+		
+	}
+
+	private HashMap<Integer, Integer> pollFullDimCellSlidesCnt(Queue<HashMap<Integer, Integer>> fullDimCellSlidesCnt2) {
+		return fullDimCellSlidesCnt2.poll();
+	}
+
+	private HashMap<Integer, Cell> pollSlides(LinkedList<HashMap<Integer, Cell>> slides2) {
+		return slides2.poll();
+	}
+
+	public double getSquareRoot(double input){
+        double squareRoot = Math.sqrt(input);
+        return squareRoot;
+    }
+
+	public double getNearestDouble(double input){
+		double nearestDouble = Math.ceil(input);
+		return nearestDouble;
+	}
+
 	public void getInfCellIndices() {
 		influencedCells = new HashSet<Integer>();
 		for (Integer cellIdxWin:windowCnt.keySet()) {
 			//verify if inlier cell
-			if (!subDimFlag && windowCnt.get(cellIdxWin) > K) {
+			if (!subDimFlag && K < getHelper('w', cellIdxWin)) {
 				continue;
 			}
 			for (Integer cellIdxSld:slideDelta.keySet()) {
-				if(neighboringSet(idxDecoder.get(cellIdxWin), idxDecoder.get(cellIdxSld))) {
+				if(neighboringSet(getHelperArray('i', cellIdxWin), getHelperArray('i', cellIdxSld))) {
 					if (!influencedCells.contains(cellIdxWin)) { 
-						influencedCells.add(cellIdxWin);
+						addHelper("ci", cellIdxWin);
 					}
 					break;
 				}
@@ -255,20 +325,43 @@ public class NETS {
 		}
 	}
 		
+	private void addHelper(String c, Integer num) {
+		switch(c){
+			case "ci":
+				influencedCells.add(num);
+				break;
+		}
+		
+	}
+
+	private ArrayList<Short> getHelperArray(char c, Integer num) {
+		if (c == 'i') return idxDecoder.get(num);
+		else return null;
+	}
+
+	private Integer getHelper(char c, Integer num) {
+		switch(c){
+			case 'w':
+				return windowCnt.get(num);
+		}
+		return null;
+	}
+	
 	public ArrayList<Integer> getSortedCandidateCellIndices(Integer cellIdxInf){
 		ArrayList<Integer> candidateCellIndices = new ArrayList<Integer>();
 				
 		HashMap<Double, HashSet<Integer>> candidateCellIndicesMap = new HashMap<Double, HashSet<Integer>>();
 		for (Integer cellIdxWin:windowCnt.keySet()) {
-			double dist = neighboringSetDist(idxDecoder.get(cellIdxInf), idxDecoder.get(cellIdxWin));
+			
+			double dist = neighboringSetDist(getHelper1('i', cellIdxInf), getHelper1('i', cellIdxWin));
 			if(!subDimFlag) {
-				if (!cellIdxInf.equals(cellIdxWin) && dist < neighCellIdxDist) {
-					if(!candidateCellIndicesMap.containsKey(dist)) candidateCellIndicesMap.put(dist, new HashSet<Integer>());
+				if (!cellIdxInf.equals(cellIdxWin) && neighCellIdxDist > dist) {
+					if(!candidateCellIndicesMap.containsKey(dist)) putHelperCandidateCell(candidateCellIndicesMap, dist, new HashSet<Integer>());
 					candidateCellIndicesMap.get(dist).add(cellIdxWin);
 				}
 			}else {
-				if (dist < neighCellIdxDist) {
-					if(!candidateCellIndicesMap.containsKey(dist)) candidateCellIndicesMap.put(dist, new HashSet<Integer>());
+				if (neighCellIdxDist > dist) {
+					if(!candidateCellIndicesMap.containsKey(dist)) putHelperCandidateCell(candidateCellIndicesMap, dist, new HashSet<Integer>());
 					candidateCellIndicesMap.get(dist).add(cellIdxWin);
 				}
 			}
@@ -277,13 +370,29 @@ public class NETS {
 		Object[] keys = candidateCellIndicesMap.keySet().toArray();
 		Arrays.sort(keys);
 		for(Object key : keys) {
-			candidateCellIndices.addAll(candidateCellIndicesMap.get(key));
-			for(Integer cellIdxWin :candidateCellIndicesMap.get(key)) {
-				candidateCellsTupleCnt += windowCnt.get(cellIdxWin);
+			candidateCellIndices.addAll(getHelperCandidateCell(candidateCellIndicesMap, key));
+			for(Integer cellIdxWin :getHelperCandidateCell(candidateCellIndicesMap, key)) {
+				candidateCellsTupleCnt += getHelper('w', cellIdxWin);
 			}
 		}
-		
 		return candidateCellIndices;
+	}
+
+	private Collection<? extends Integer> getHelperCandidateCell(
+			HashMap<Double, HashSet<Integer>> candidateCellIndicesMap, Object key) {
+		return candidateCellIndicesMap.get(key);
+	}
+
+	private void putHelperCandidateCell(HashMap<Double, HashSet<Integer>> candidateCellIndicesMap, double dist, HashSet<Integer> hashSet) {
+		candidateCellIndicesMap.put(dist, new HashSet<Integer>());
+	}
+
+	private ArrayList<Short> getHelper1(char c, Integer num) {
+		switch(c){
+			case 'i':
+				return idxDecoder.get(num);
+		}	
+		return null;
 	}
 
 	public void findOutlier(String type, int itr) {
@@ -291,41 +400,22 @@ public class NETS {
 		Iterator<Tuple> it = outliers.iterator();
 		while (it.hasNext()) {
 			Tuple outlier = it.next();
-			if(slideOut.containsKey(idxEncoder.get(outlier.subDimCellIdx)) && slideOut.get(idxEncoder.get(outlier.subDimCellIdx)).tuples.contains(outlier)) {  
+			if(slideOut.containsKey(getHelper2('i', outlier.subDimCellIdx)) && slideOut.get(getHelper2('i', outlier.subDimCellIdx)).tuples.contains(outlier)) {  
 				it.remove();
-			}else if(fullDimCellWindowCnt.get(idxEncoder.get(outlier.fullDimCellIdx))>K){ 
+			}else if(fullDimCellWindowCnt.get(getHelper2('i', outlier.fullDimCellIdx))>K){ 
 				it.remove();
 			}
 		}
-		if(type == "NAIVE")
-			this.findOutlierNaive();
-		else if(type == "NETS")
+		switch(type){
+			case "NETS":
 			this.findOutlierNETS(itr);
+			break;
+		}
 	}
 
-	public void findOutlierNaive() {
-		HashSet<Tuple> allTuples = new HashSet<Tuple>();
-		for(HashMap<Integer, Cell> slide:slides) {
-			for(Cell cell: slide.values()) {
-				allTuples.addAll(cell.tuples);
-			}
-		}
-		outliers.clear();
-		
-		for(Tuple candTuple:allTuples) {
-			boolean outlierFlag = true;
-			candTuple.nn =0;
-			for(Tuple otherTuple:allTuples) {
-				if ((candTuple.id != otherTuple.id) && (neighboringTuple(candTuple, otherTuple,R))) {
-					candTuple.nn+=1;
-				}
-				if (candTuple.nn>=K) {
-					outlierFlag = false;
-					break;
-				}
-			}
-			if(outlierFlag) outliers.add(candTuple);
-		}
+	private Integer getHelper2(char c, ArrayList<Short> num) {
+		if(c=='i') return idxEncoder.get(num);
+		return null;
 	}
 	
 	public void findOutlierNETS(int itr) {
@@ -336,13 +426,17 @@ public class NETS {
 		InfCellLoop:
 		for (Integer infCellIdx: influencedCells) {
 			//find neighbor cells
-			candidateCellsTupleCnt = 0;
+			candidateCellsTupleCnt = slideZero;
 			ArrayList<Integer> candCellIndices = getSortedCandidateCellIndices(infCellIdx);		
-			if(!subDimFlag) candidateCellsTupleCnt += windowCnt.get(infCellIdx);
+			if(subDimFlag);
+			else{ 
+				candidateCellsTupleCnt += getHelper('w', infCellIdx);
+			}
 			//verify if outlier cell 
-			if(candidateCellsTupleCnt < K+1) {
+			if(K+slideOne > candidateCellsTupleCnt) {
 				for(HashMap<Integer, Cell> slide: slides) {
-					if(!slide.containsKey(infCellIdx)) continue;
+					if(slide.containsKey(infCellIdx));
+					else continue;
 					outliers.addAll(slide.get(infCellIdx).tuples);
 				}
 				continue InfCellLoop;
@@ -351,17 +445,18 @@ public class NETS {
 			//for each tuples in a non-determined cell
 			HashSet<Tuple> candOutlierTuples = new HashSet<Tuple>();			
 			for(HashMap<Integer, Cell> slide: slides) {
-				if(!slide.containsKey(infCellIdx)) continue;
+				if(slide.containsKey(infCellIdx));
+				else continue;
 				for (Tuple t:slide.get(infCellIdx).tuples) {
 					if(t.safeness) {
 						continue;
 					}
-					t.nnIn = fullDimCellWindowCnt.get(idxEncoder.get(t.fullDimCellIdx))-1;
+					t.nnIn = fullDimCellWindowCnt.get(getHelper2('i', t.fullDimCellIdx))-slideOne;
 					t.removeOutdatedNNUnsafeOut(itr, nS);
-					if(t.getNN()<K) {
-						candOutlierTuples.add(t);
+					if(K>t.getNN()) {
+						addHelper1("co",candOutlierTuples, t);
 					}else if(outliers.contains(t)){
-						outliers.remove(t);
+						removeHelper1(outliers,t);
 					}
 				}
 			}
@@ -370,16 +465,16 @@ public class NETS {
 			TupleLoop:
 			for (Tuple tCand:candOutlierTuples) {
 				Iterator<HashMap<Integer, Cell>> slideIterator = slides.descendingIterator();
-				int currentSlideID = itr+1;
+				int currentSlideID = itr+slideOne;
 				
 				SlideLoop:
 				while(slideIterator.hasNext()) {
 					HashMap<Integer, Cell> currentSlide = slideIterator.next();
 					currentSlideID--;						
-					if(tCand.unSafeOutNeighbors.containsKey(currentSlideID)) {
-						continue SlideLoop;
+					if(!tCand.unSafeOutNeighbors.containsKey(currentSlideID)) {
+						tCand.unSafeOutNeighbors.put(currentSlideID,slideZero);
 					}else {
-						tCand.unSafeOutNeighbors.put(currentSlideID,0);
+						continue SlideLoop;
 					}
 											
 					CellLoop:
@@ -403,10 +498,10 @@ public class NETS {
 						for (Tuple tOther: otherTuples) {
 							if(neighboringTuple(tCand, tOther,R)) {
 								if(tCand.slideID <= tOther.slideID) {
-									tCand.nnSafeOut+=1;
+									tCand.nnSafeOut+=slideOne;
 								}else {
-									tCand.nnUnSafeOut+=1;
-									tCand.unSafeOutNeighbors.put(currentSlideID, tCand.unSafeOutNeighbors.get(currentSlideID) + 1);
+									tCand.nnUnSafeOut+=slideOne;
+									tCand.unSafeOutNeighbors.put(currentSlideID, tCand.unSafeOutNeighbors.get(currentSlideID) + slideOne);
 								}
 								if(tCand.nnSafeOut >= K) {
 									if(outliers.contains(tCand)) outliers.remove(tCand);
@@ -423,26 +518,35 @@ public class NETS {
 					}
 				}
 				outliers.add(tCand);
-			}
-			
-			
+			}			
 		}		
-		
 	}	
 	
+	private void removeHelper1(HashSet<Tuple> outliers2, Tuple t) {
+		outliers2.remove(t);
+	}
+
+	private void addHelper1(String c, HashSet<Tuple> candOutlierTuples, Tuple t) {
+		switch(c){
+			case "co":
+				candOutlierTuples.add(t);
+				break;
+		}
+	}
+
 	public double distTuple(Tuple t1, Tuple t2) {
-		double ss = 0;
+		double ss = slideZero;
 		for(int i = 0; i<dim; i++) { 
-			ss += Math.pow((t1.value[i] - t2.value[i]),2);
+			ss += Math.pow((t1.value[i] - t2.value[i]),slideTwo);
 		}
 		 return getSquareRoot(ss);
 	}
 	
 	public boolean neighboringTuple(Tuple t1, Tuple t2, double threshold) {
-		double ss = 0;
+		double ss = slideZero;
 		threshold *= threshold;
 		for(int i = 0; i<dim; i++) { 
-			ss += Math.pow((t1.value[i] - t2.value[i]),2);
+			ss += Math.pow((t1.value[i] - t2.value[i]),slideTwo);
 			if(ss>threshold) return false;
 		}
 		return true;
@@ -450,45 +554,35 @@ public class NETS {
 
 	public boolean neighboringTupleSet(double[] v1, double[] v2, double threshold) {
 	
-		double ss = 0;
+		double ss = slideZero;
 		threshold *= threshold;
 		for(int i = 0; i<v2.length; i++) { 
-			ss += Math.pow((v1[i] - v2[i]),2);
+			ss += Math.pow((v1[i] - v2[i]),slideTwo);
 			if(ss > threshold) return false;
 		}
 		 return true;
 	}
 	
 	public double neighboringSetDist(ArrayList<Short> c1, ArrayList<Short> c2) {
-		double ss = 0;
+		double ss = slideZero;
 		double cellIdxDist = (c1.size() == dim ? neighCellFullDimIdxDist : neighCellIdxDist);
 		double threshold = cellIdxDist*cellIdxDist;
 		for(int k = 0; k<c1.size(); k++) {
-			ss += Math.pow((c1.get(k) - c2.get(k)),2);
+			ss += Math.pow((c1.get(k) - c2.get(k)),slideTwo);
 			if (ss >= threshold) return Double.MAX_VALUE;
 		}
 		 return getSquareRoot(ss);
 	}
 	
 	public boolean neighboringSet(ArrayList<Short> c1, ArrayList<Short> c2) {
-		double ss = 0;
+		double ss = slideZero;
 		double cellIdxDist = (c1.size() == dim ? neighCellFullDimIdxDist : neighCellIdxDist);
 		double threshold =cellIdxDist*cellIdxDist;
 		for(int k = 0; k<c1.size(); k++) {
-			ss += Math.pow((c1.get(k) - c2.get(k)),2);
+			ss += Math.pow((c1.get(k) - c2.get(k)),slideTwo);
 			if (ss >= threshold) return false;
 		}
 		 return true;
-	}
-
-	public double getSquareRoot(double input){
-        double squareRoot = Math.sqrt(input);
-        return squareRoot;
-    }
-
-	public double getNearestDouble(double input){
-		double nearestDouble = Math.ceil(input);
-		return nearestDouble;
 	}
 
 }

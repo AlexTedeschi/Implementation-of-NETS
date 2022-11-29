@@ -79,7 +79,8 @@ public class testBase {
 			System.out.println("subDim: "+subDim);
 			System.out.println("R/K/W/S: "+R+"/"+K+"/"+W+"/"+S);
 			System.out.println("# of windows: "+(itr-nS+1));
-			System.out.println("Avg CPU time(s): " + allTimeSum/(itr-nS+1));
+			// System.out.println("Avg CPU time(s): " + allTimeSum/(itr-nS+1));
+			System.out.println("Avg CPU time(s): " + String.format("%.8f", allTimeSum/(itr-nS+1)) );
 			System.out.println("Peak memory(MB): "+peakMemory);
 		}else if (type =="File") {
 			fw.write("# Dataset: "+dataset+"\n");
