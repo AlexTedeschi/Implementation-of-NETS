@@ -302,6 +302,11 @@ public class NETS {
         return squareRoot;
     }
 
+	public double getSquare(double input){
+		double square = Math.pow(input, slideTwo);
+		return square;
+	}
+
 	public double getNearestDouble(double input){
 		double nearestDouble = Math.ceil(input);
 		return nearestDouble;
@@ -471,10 +476,10 @@ public class NETS {
 				while(slideIterator.hasNext()) {
 					HashMap<Integer, Cell> currentSlide = slideIterator.next();
 					currentSlideID--;						
-					if(!tCand.unSafeOutNeighbors.containsKey(currentSlideID)) {
-						tCand.unSafeOutNeighbors.put(currentSlideID,slideZero);
-					}else {
+					if(tCand.unSafeOutNeighbors.containsKey(currentSlideID)) {
 						continue SlideLoop;
+					}else {
+						tCand.unSafeOutNeighbors.put(currentSlideID,slideZero);
 					}
 											
 					CellLoop:
@@ -484,40 +489,44 @@ public class NETS {
 							continue CellLoop;
 						
 						HashSet<Tuple> otherTuples = new HashSet<Tuple>();
-						if(subDimFlag) {
+						if(!subDimFlag) {
+							otherTuples = currentSlide.get(otherCellIdx).tuples;
+						}else{								
 							//reduce search space using sub-dims
 							for(Cell allIdxCell: currentSlide.get(otherCellIdx).childCells.values()) {
-								if(!allIdxCell.cellIdx.equals(tCand.fullDimCellIdx) 
-								   && neighboringSet(allIdxCell.cellIdx, tCand.fullDimCellIdx))
-									otherTuples.addAll(allIdxCell.tuples);
+								if(allIdxCell.cellIdx.equals(tCand.fullDimCellIdx) 
+								   && !neighboringSet(allIdxCell.cellIdx, tCand.fullDimCellIdx));
+								else otherTuples.addAll(allIdxCell.tuples);
 							}
-						}else{								
-							otherTuples = currentSlide.get(otherCellIdx).tuples;
 						}
 						
 						for (Tuple tOther: otherTuples) {
-							if(neighboringTuple(tCand, tOther,R)) {
-								if(tCand.slideID <= tOther.slideID) {
-									tCand.nnSafeOut+=slideOne;
-								}else {
+							if(!neighboringTuple(tCand, tOther,R));
+							else {
+								if(tCand.slideID > tOther.slideID) {
 									tCand.nnUnSafeOut+=slideOne;
 									tCand.unSafeOutNeighbors.put(currentSlideID, tCand.unSafeOutNeighbors.get(currentSlideID) + slideOne);
+								}else {
+									tCand.nnSafeOut+=slideOne;
 								}
-								if(tCand.nnSafeOut >= K) {
-									if(outliers.contains(tCand)) outliers.remove(tCand);
+								if(tCand.nnSafeOut < K);
+								else {
+									if(!outliers.contains(tCand));
+									else outliers.remove(tCand);
 									tCand.safeness = true;
-									//tCand.truncate();
 									continue TupleLoop;
 								}
 							}
 						}
 					}
-					if (tCand.getNN() >= K) {
-						if(outliers.contains(tCand)) outliers.remove(tCand);
+					if (tCand.getNN() < K);
+					else {
+						if(!outliers.contains(tCand));
+						else removeHelper1(outliers, tCand);
 						continue TupleLoop;
 					}
 				}
-				outliers.add(tCand);
+				addHelper1("o", null, tCand);
 			}			
 		}		
 	}	
@@ -531,23 +540,31 @@ public class NETS {
 			case "co":
 				candOutlierTuples.add(t);
 				break;
+			case "o":
+				outliers.add(t);
+				break;
 		}
 	}
 
 	public double distTuple(Tuple t1, Tuple t2) {
 		double ss = slideZero;
 		for(int i = 0; i<dim; i++) { 
-			ss += Math.pow((t1.value[i] - t2.value[i]),slideTwo);
+			ss += Math.pow(getResultHelper(t1.value[i],t2.value[i]),slideTwo);
 		}
 		 return getSquareRoot(ss);
 	}
 	
+	private double getResultHelper(double d, double e) {
+		return d-e;
+	}
+
 	public boolean neighboringTuple(Tuple t1, Tuple t2, double threshold) {
 		double ss = slideZero;
 		threshold *= threshold;
 		for(int i = 0; i<dim; i++) { 
-			ss += Math.pow((t1.value[i] - t2.value[i]),slideTwo);
-			if(ss>threshold) return false;
+			ss += Math.pow(getResultHelper(t1.value[i],t2.value[i]),slideTwo);
+			if(ss<=threshold);
+			else return false;
 		}
 		return true;
 	}
@@ -557,8 +574,9 @@ public class NETS {
 		double ss = slideZero;
 		threshold *= threshold;
 		for(int i = 0; i<v2.length; i++) { 
-			ss += Math.pow((v1[i] - v2[i]),slideTwo);
-			if(ss > threshold) return false;
+			ss += Math.pow(getResultHelper(v1[i],v2[i]),slideTwo);
+			if(ss <= threshold);
+			else return false;
 		}
 		 return true;
 	}
@@ -566,10 +584,11 @@ public class NETS {
 	public double neighboringSetDist(ArrayList<Short> c1, ArrayList<Short> c2) {
 		double ss = slideZero;
 		double cellIdxDist = (c1.size() == dim ? neighCellFullDimIdxDist : neighCellIdxDist);
-		double threshold = cellIdxDist*cellIdxDist;
+		double threshold = getSquare(cellIdxDist);
 		for(int k = 0; k<c1.size(); k++) {
-			ss += Math.pow((c1.get(k) - c2.get(k)),slideTwo);
-			if (ss >= threshold) return Double.MAX_VALUE;
+			ss += getSquare((int)getResultHelper(c1.get(k), c2.get(k)));
+			if (ss < threshold);
+			else return Double.MAX_VALUE;
 		}
 		 return getSquareRoot(ss);
 	}
@@ -577,10 +596,11 @@ public class NETS {
 	public boolean neighboringSet(ArrayList<Short> c1, ArrayList<Short> c2) {
 		double ss = slideZero;
 		double cellIdxDist = (c1.size() == dim ? neighCellFullDimIdxDist : neighCellIdxDist);
-		double threshold =cellIdxDist*cellIdxDist;
+		double threshold =getSquare(cellIdxDist);
 		for(int k = 0; k<c1.size(); k++) {
-			ss += Math.pow((c1.get(k) - c2.get(k)),slideTwo);
-			if (ss >= threshold) return false;
+			ss += getSquare((int)getResultHelper(c1.get(k), c2.get(k)));
+			if (ss < threshold);
+			else return false;
 		}
 		 return true;
 	}

@@ -42,7 +42,6 @@ public class Prioritizer {
 			double var = getVariance(cnt, mean);
 			double VMR = var/mean;
 			VMRMap.put(i, VMR);
-			//System.out.println("Dim "+i+": "+VMR);
 		}
 		
 		HashMap<Double,Integer> VMRMap_Inv = new HashMap<Double,Integer>();
@@ -56,7 +55,6 @@ public class Prioritizer {
 		Arrays.sort(sortedVMRs);
 		for(int i = 0; i <dim; i++) {
 			System.out.print(VMRMap_Inv.get(sortedVMRs[i])+",");
-			//System.out.println(sortedVMRs[i]);
 		}
 	}
 	

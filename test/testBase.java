@@ -1,7 +1,5 @@
 package test;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -72,7 +70,6 @@ public class testBase {
 			System.out.println("subDim: "+subDim);
 			System.out.println("R/K/W/S: "+R+"/"+K+"/"+W+"/"+S);
 			System.out.println("# of windows: "+(itr-nS+1));
-			// System.out.println("Avg CPU time(s): " + allTimeSum/(itr-nS+1));
 			System.out.println("Avg CPU time(s): " + String.format("%.8f", allTimeSum/(itr-nS+1)) );
 			System.out.println("Peak memory(MB): "+peakMemory);
 	}
