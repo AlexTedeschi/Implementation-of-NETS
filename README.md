@@ -18,6 +18,9 @@ REMOVE AND REPLACE: This paper addresses the problem of efficiently detecting ou
 
 ## 3. Configuration
 We are currently trying to implement the NETS algorithm in JAVA and run on **JDK 17.0.4.1.**
+Code from utilities and non algorithm functions was brought over
+Certain printouts, variables, and constructors were eliminated to improve time
+Main algorithms were recoded
 
 ## 4. Proposed Parameters
 ```
