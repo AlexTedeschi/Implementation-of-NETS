@@ -413,6 +413,7 @@ public class NETS {
 		return null;
 	}
 
+	// Find outliers in the data stream
 	public void findOutlier(String type, int itr) {
 		// Remove expired or outdated outliers
 		Iterator<Tuple> it = outliers.iterator();

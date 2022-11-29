@@ -34,10 +34,6 @@ public class testBase {
 		ArrayList<Tuple> newSlideTuples;
 		NETS detector = new NETS(dim, subDim, R, K, S, W, nW, streamGen.getMaxValues(), streamGen.getMinValues());
 		
-		if(args.length > 0){
-			String fileName = "Result/Result_"+dataset+"_"+method+"_D"+dim+"_sD"+subDim+"_rand"+randSubDim+"_R"+R+"_K"+K+"_S"+S+"_W"+W+"_nW"+nW+".txt";
-		}
-		
 	/* Simulate sliding windows */
         mesureThread.start();
         int itr = 0;
