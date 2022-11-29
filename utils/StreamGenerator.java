@@ -28,6 +28,20 @@ public class StreamGenerator {
 				this.priorityList = Arrays.asList(new Integer[] {1,2,0});
 				sortPriority(random);
 				break;
+			case "HPC":
+				filePath = "dataset1/HPC.csv";
+				this.maxValues = new double[]{10.67, 1.39, 252.14, 46.4, 80, 78, 31};
+				this.minValues = new double[]{0.076, 0, 223.49, 0.2, 0 , 0 , 0};
+				this.priorityList = Arrays.asList(new Integer[] {2,3,0,1,6,5,4});
+				sortPriority(random);
+				break;
+			case "FC":
+				filePath = "dataset1/FC.csv";
+				this.maxValues = new double[]{3858,360,66,1397,601,7117,254,254,254,7173,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,7};
+				this.minValues = new double[]{1859,0,0,0,-173,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1};
+				this.priorityList = Arrays.asList(new Integer[] {1,5,9,8,0,3,6,2,7,4,54,10,12,42,36,45,13,46,43,25,23,35,44,37,51,26,52,33,24,11,17,53,19,15,32,30,14,29,16,39,31,18,48,22,41,34,47,40,27,50,21,49,20,28,38});
+				sortPriority(random);
+				break;
 			case "STK":
 				filePath = "datasets/Stock.csv";
 				this.maxValues = new double[]{9930};

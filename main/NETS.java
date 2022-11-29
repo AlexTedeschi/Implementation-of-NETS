@@ -9,22 +9,21 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 public class NETS {
-	public double R;
-	public int K;
-	public int dim;
-	public int subDim;
-	public boolean subDimFlag;
-	public int S;
-	public int W;
-	public int nS;
-	public int nW;
+	public double radius;
+	public int k_neighbors;
+	public int dimension;
+	public int sub_dimension;
+	public boolean subdimension_flag;
+	public int slide_size;
+	public int window_size;
+	public int number_of_slides;
+	public int number_of_windows;
 	public double neighCellIdxDist;
 	public double neighCellFullDimIdxDist;
 	public double[] maxValues;
 	public double[] minValues;
-	public double[] dimLength;
-	public double[] subDimLength;
-	
+	public double[] dimension_Length;
+	public double[] subDimension_Length;
 	public HashMap<Integer,Cell> slideIn;
 	public HashMap<Integer,Cell> slideOut;
 	public HashMap<Integer,Integer> windowCnt;
@@ -44,18 +43,18 @@ public class NETS {
 	int slideTwo = 2;
 	public int candidateCellsTupleCnt = slideZero;
 	
-	public NETS(int dim, int subDim, double R, int K, int S, int W, int nW, double[] maxValues, double[] minValues) {
-		this.dim = dim;
-		this.subDim = subDim;
-		this.subDimFlag = dim != subDim;
-		this.R = R;
-		this.K = K;
-		this.S = S;
-		this.W = W;
-		this.nW = nW;
-		this.nS = W/S;
-		this.neighCellIdxDist = getSquareRoot(subDim)*slideTwo;
-		this.neighCellFullDimIdxDist = getSquareRoot(dim)*slideTwo;
+	public NETS(int dimension, int sub_dimension, double radius, int K, int slide_size, int window_size, int number_of_windows, double[] maxValues, double[] minValues) {
+		this.dimension = dimension;
+		this.sub_dimension = sub_dimension;
+		this.subdimension_flag = dimension != sub_dimension;
+		this.radius = radius;
+		this.k_neighbors = K;
+		this.slide_size = slide_size;
+		this.window_size = window_size;
+		this.number_of_windows = number_of_windows;
+		this.number_of_slides = window_size / slide_size;
+		this.neighCellIdxDist = getSquareRoot(sub_dimension)*slideTwo;
+		this.neighCellFullDimIdxDist = getSquareRoot(dimension)*slideTwo;
 		this.maxValues = maxValues;
 		this.minValues = minValues;
 		
@@ -71,36 +70,36 @@ public class NETS {
 		this.outliers = new HashSet<Tuple>();
 						
 		/* Cell size calculation for all dimensions*/
-		double[] dimSize = new double[dim];
+		double[] dimSize = new double[dimension];
 		dimSize = getdimSize(dimSize);
 		
-		int[] dimWeights = new int[dim];
+		int[] dimWeights = new int[dimension];
 		dimWeights = getDimWeights(dimWeights, dimSize);
 				
 		/* Cell size calculation for sub dimensions*/
-		if (subDimFlag) {
+		if (subdimension_flag) {
 			calcSubDimDetails();
 		}
 	}
 	
 	private void calcSubDimDetails() {
-		double[] subDimSize = subDimInitializer(subDim);
+		double[] subDimSize = subDimInitializer(sub_dimension);
 		subDimSize = getSubDimSize(subDimSize);
 		
 		double subDimWeightsSum = slideZero;
-		int[] subDimWeights = new int[subDim];
-		for(int i=0;i<subDim;i++) {    
+		int[] subDimWeights = new int[sub_dimension];
+		for(int i = 0; i< sub_dimension; i++) {
 			subDimWeights[i] = slideOne; //equal-weight
 			subDimWeightsSum+=subDimWeights[i];
 		}
 		
-		subDimLength = subDimInitializer(subDim);
-		double[] subDimgapCount = subDimInitializer(subDim);
+		subDimension_Length = subDimInitializer(sub_dimension);
+		double[] subDimgapCount = subDimInitializer(sub_dimension);
 		getSquare(subDimWeightsSum);
-		for(int i = 0;i<subDim;i++) {
-			subDimLength[i] = getSquareRoot(R*R*subDimWeights[i]/subDimWeightsSum);
-			subDimgapCount[i] = getNearestDouble(subDimSize[i]/subDimLength[i]);
-			subDimSize[i] = subDimgapCount[i]*subDimLength[i];
+		for(int i = 0; i< sub_dimension; i++) {
+			subDimension_Length[i] = getSquareRoot(radius * radius *subDimWeights[i]/subDimWeightsSum);
+			subDimgapCount[i] = getNearestDouble(subDimSize[i]/subDimension_Length[i]);
+			subDimSize[i] = subDimgapCount[i]*subDimension_Length[i];
 		}
 	}
 
@@ -111,7 +110,7 @@ public class NETS {
 	private double[] getSubDimSize(double[] subDimSize) {
 		double minSubDimSize = Integer.MAX_VALUE;
 		getSquare(minSubDimSize);
-		for(int i=0;i<subDim;i++) {
+		for(int i = 0; i< sub_dimension; i++) {
 			subDimSize[i] = maxValues[i] - minValues[i]; 
 			if(subDimSize[i] <minSubDimSize) minSubDimSize = subDimSize[i];
 		}
@@ -121,17 +120,17 @@ public class NETS {
 	private int[] getDimWeights(int[] dimWeights, double[] dimSize) {
 		double dimWeightsSum = slideZero;
 		getSquare(dimWeightsSum);
-		for(int i=0;i<dim;i++) {   
+		for(int i = 0; i< dimension; i++) {
 			dimWeights[i] = slideOne; //equal-weight
 			dimWeightsSum+=dimWeights[i];
 		}
 
-		dimLength = new double[dim];
-		double[] gapCount = new double[dim];
-		for(int i = 0;i<dim;i++) {  
-			dimLength[i] = getSquareRoot(R*R*dimWeights[i]/dimWeightsSum);
-			gapCount[i] = getNearestDouble(dimSize[i]/dimLength[i]);
-			dimSize[i] = gapCount[i]*dimLength[i];
+		dimension_Length = new double[dimension];
+		double[] gapCount = new double[dimension];
+		for(int i = 0; i< dimension; i++) {
+			dimension_Length[i] = getSquareRoot(radius * radius *dimWeights[i]/dimWeightsSum);
+			gapCount[i] = getNearestDouble(dimSize[i]/ dimension_Length[i]);
+			dimSize[i] = gapCount[i]* dimension_Length[i];
 		}
 		return dimWeights;
 	}
@@ -139,13 +138,14 @@ public class NETS {
 	private double[] getdimSize(double[] dimSize) {
 		double minDimSize = Integer.MAX_VALUE;
 		getSquare(minDimSize);
-		for(int i=0;i<dim;i++) {
+		for(int i = 0; i< dimension; i++) {
 			dimSize[i] = maxValues[i] - minValues[i]; 
 			if(dimSize[i] <minDimSize) minDimSize = dimSize[i];
 		}
 		return dimSize;
 	}
 
+	// Cell level outlier detection
 	public void indexingSlide(ArrayList<Tuple> slideTuples){
 		slideIn = new HashMap<Integer,Cell>();
 		fullDimCellSlideInCnt = new HashMap<Integer,Integer>();
@@ -154,7 +154,7 @@ public class NETS {
 			ArrayList<Short> fullDimCellIdx = new ArrayList<Short>();
 			ArrayList<Short> subDimCellIdx = new ArrayList<Short>();
 			fullDimCellIdx = getFullDimCellIdx(fullDimCellIdx,t);
-			if (!subDimFlag) {
+			if (!subdimension_flag) {
 				subDimCellIdx = fullDimCellIdx;
 			}else {
 				subDimCellIdx = getSubDimCellIdx(subDimCellIdx, t);
@@ -177,17 +177,17 @@ public class NETS {
 			}
 			if(slideIn.containsKey(getHelper2('i', subDimCellIdx)));
 			else {
-				double[] cellCenter = new double[subDim];
-				if (!subDimFlag) {
+				double[] cellCenter = new double[sub_dimension];
+				if (!subdimension_flag) {
 					getSquare(slideOne);
-					for (int j = 0; j<dim; j++) cellCenter[j] = minValues[j] + fullDimCellIdx.get(j)*dimLength[j]+dimLength[j]/slideTwo;
+					for (int j = 0; j< dimension; j++) cellCenter[j] = minValues[j] + fullDimCellIdx.get(j)* dimension_Length[j]+ dimension_Length[j]/slideTwo;
 				}else {
 					getSquare(slideOne);
-					for (int j = 0; j<subDim; j++) cellCenter[j] = minValues[j] + subDimCellIdx.get(j)*subDimLength[j]+subDimLength[j]/slideTwo;
+					for (int j = 0; j< sub_dimension; j++) cellCenter[j] = minValues[j] + subDimCellIdx.get(j)*subDimension_Length[j]+subDimension_Length[j]/slideTwo;
 				}
-				slideIn.put(getHelper2('i', subDimCellIdx), new Cell(subDimCellIdx, cellCenter, subDimFlag));
+				slideIn.put(getHelper2('i', subDimCellIdx), new Cell(subDimCellIdx, cellCenter, subdimension_flag));
 			}
-			slideIn.get(getHelper2('i', subDimCellIdx)).addTuple(t, subDimFlag);
+			slideIn.get(getHelper2('i', subDimCellIdx)).addTuple(t, subdimension_flag);
 			
 			if(fullDimCellSlideInCnt.containsKey(getHelper2('i', fullDimCellIdx)));
 			else {
@@ -201,26 +201,27 @@ public class NETS {
 	}
 	
 	private ArrayList<Short> getSubDimCellIdx(ArrayList<Short> subDimCellIdx, Tuple t) {
-		for (int j = 0; j<subDim; j++) {
-			short dimIdx = (short) ((t.value[j]-minValues[j])/subDimLength[j]);
+		for (int j = 0; j< sub_dimension; j++) {
+			short dimIdx = (short) ((t.value[j]-minValues[j])/subDimension_Length[j]);
 			subDimCellIdx.add(dimIdx);
 		}
 		return subDimCellIdx;
 	}
 
 	private ArrayList<Short> getFullDimCellIdx(ArrayList<Short> fullDimCellIdx, Tuple t) {
-		for (int j = 0; j<dim; j++) { 
-			short dimIdx = (short) ((t.value[j]-minValues[j])/dimLength[j]);
+		for (int j = 0; j< dimension; j++) {
+			short dimIdx = (short) ((t.value[j]-minValues[j])/ dimension_Length[j]);
 			fullDimCellIdx.add(dimIdx);
 		}
 		return fullDimCellIdx;
 	}
 
+	// For calculating slide net effect change (Preprocessing)
 	public void calcNetChange(ArrayList<Tuple> slideTuples, int itr) {
 		this.indexingSlide(slideTuples);
 		
 		/* Slide out */
-		int slideNum = nS-slideOne;
+		int slideNum = number_of_slides -slideOne;
 		if(slideNum < itr) {
 			slideOut = pollSlides(slides);
 			fullDimCellSlideOutCnt = pollFullDimCellSlidesCnt(fullDimCellSlidesCnt);
@@ -327,7 +328,7 @@ public class NETS {
 		influencedCells = new HashSet<Integer>();
 		for (Integer cellIdxWin:windowCnt.keySet()) {
 			//verify if inlier cell
-			if (!subDimFlag && K < getHelper('w', cellIdxWin)) {
+			if (!subdimension_flag && k_neighbors < getHelper('w', cellIdxWin)) {
 				continue;
 			}
 			for (Integer cellIdxSld:slideDelta.keySet()) {
@@ -370,7 +371,7 @@ public class NETS {
 		for (Integer cellIdxWin:windowCnt.keySet()) {
 			
 			double dist = neighboringSetDist(getHelper1('i', cellIdxInf), getHelper1('i', cellIdxWin));
-			if(!subDimFlag) {
+			if(!subdimension_flag) {
 				if (!cellIdxInf.equals(cellIdxWin) && neighCellIdxDist > dist) {
 					if(!candidateCellIndicesMap.containsKey(dist)) putHelperCandidateCell(candidateCellIndicesMap, dist, new HashSet<Integer>());
 					candidateCellIndicesMap.get(dist).add(cellIdxWin);
@@ -419,7 +420,7 @@ public class NETS {
 			Tuple outlier = it.next();
 			if(slideOut.containsKey(getHelper2('i', outlier.subDimCellIdx)) && slideOut.get(getHelper2('i', outlier.subDimCellIdx)).tuples.contains(outlier)) {  
 				it.remove();
-			}else if(fullDimCellWindowCnt.get(getHelper2('i', outlier.fullDimCellIdx))>K){ 
+			}else if(fullDimCellWindowCnt.get(getHelper2('i', outlier.fullDimCellIdx))>k_neighbors){
 				it.remove();
 			}
 		}
@@ -434,23 +435,24 @@ public class NETS {
 		if(c=='i') return idxEncoder.get(num);
 		return null;
 	}
-	
+
+	// This function is used to find outliers in a given data stream
 	public void findOutlierNETS(int itr) {
 		// Will not return inlier cells and not influenced cells
 		getInfCellIndices();
-		
-		// for each cell 
+
+		//Point level outlier detection
 		InfCellLoop:
 		for (Integer infCellIdx: influencedCells) {
 			//find neighbor cells
 			candidateCellsTupleCnt = slideZero;
 			ArrayList<Integer> candCellIndices = getSortedCandidateCellIndices(infCellIdx);		
-			if(subDimFlag);
+			if(subdimension_flag);
 			else{ 
 				candidateCellsTupleCnt += getHelper('w', infCellIdx);
 			}
 			//verify if outlier cell 
-			if(K+slideOne > candidateCellsTupleCnt) {
+			if(k_neighbors+slideOne > candidateCellsTupleCnt) {
 				for(HashMap<Integer, Cell> slide: slides) {
 					if(slide.containsKey(infCellIdx));
 					else continue;
@@ -459,7 +461,7 @@ public class NETS {
 				continue InfCellLoop;
 			}
 			
-			//for each tuples in a non-determined cell
+
 			HashSet<Tuple> candOutlierTuples = new HashSet<Tuple>();			
 			for(HashMap<Integer, Cell> slide: slides) {
 				if(slide.containsKey(infCellIdx));
@@ -469,8 +471,8 @@ public class NETS {
 						continue;
 					}
 					t.nnIn = fullDimCellWindowCnt.get(getHelper2('i', t.fullDimCellIdx))-slideOne;
-					t.removeOutdatedNNUnsafeOut(itr, nS);
-					if(K>t.getNN()) {
+					t.removeOutdatedNNUnsafeOut(itr, number_of_slides);
+					if(k_neighbors>t.getNN()) {
 						addHelper1("co",candOutlierTuples, t);
 					}else if(outliers.contains(t)){
 						removeHelper1(outliers,t);
@@ -497,11 +499,11 @@ public class NETS {
 											
 					CellLoop:
 					for(Integer otherCellIdx: candCellIndices) {
-						if(currentSlide.containsKey(otherCellIdx) && neighboringTupleSet(tCand.value, currentSlide.get(otherCellIdx).cellCenter, 1.5*R));
+						if(currentSlide.containsKey(otherCellIdx) && neighboringTupleSet(tCand.value, currentSlide.get(otherCellIdx).cellCenter, 1.5* radius));
 						else continue CellLoop;
 						
 						HashSet<Tuple> otherTuples = new HashSet<Tuple>();
-						if(!subDimFlag) {
+						if(!subdimension_flag) {
 							otherTuples = currentSlide.get(otherCellIdx).tuples;
 						}else{								
 							//reduce search space using sub-dims
@@ -513,7 +515,7 @@ public class NETS {
 						}
 						
 						for (Tuple tOther: otherTuples) {
-							if(!neighboringTuple(tCand, tOther,R));
+							if(!neighboringTuple(tCand, tOther, radius));
 							else {
 								if(tCand.slideID > tOther.slideID) {
 									tCand.nnUnSafeOut+=slideOne;
@@ -521,7 +523,7 @@ public class NETS {
 								}else {
 									tCand.nnSafeOut+=slideOne;
 								}
-								if(tCand.nnSafeOut < K);
+								if(tCand.nnSafeOut < k_neighbors);
 								else {
 									if(!outliers.contains(tCand));
 									else outliers.remove(tCand);
@@ -531,7 +533,7 @@ public class NETS {
 							}
 						}
 					}
-					if (tCand.getNN() < K);
+					if (tCand.getNN() < k_neighbors);
 					else {
 						if(!outliers.contains(tCand));
 						else removeHelper1(outliers, tCand);
@@ -542,7 +544,7 @@ public class NETS {
 			}			
 		}		
 	}	
-	
+
 	private void removeHelper1(HashSet<Tuple> outliers2, Tuple t) {
 		outliers2.remove(t);
 	}
@@ -560,7 +562,7 @@ public class NETS {
 
 	public double distTuple(Tuple t1, Tuple t2) {
 		double ss = slideZero;
-		for(int i = 0; i<dim; i++) { 
+		for(int i = 0; i< dimension; i++) {
 			ss += getSquare(getResultHelper(t1.value[i],t2.value[i]));
 		}
 		 return getSquareRoot(ss);
@@ -573,7 +575,7 @@ public class NETS {
 	public boolean neighboringTuple(Tuple t1, Tuple t2, double threshold) {
 		double ss = slideZero;
 		threshold *= threshold;
-		for(int i = 0; i<dim; i++) { 
+		for(int i = 0; i< dimension; i++) {
 			ss += getSquare(getResultHelper(t1.value[i],t2.value[i]));
 			if(ss<=threshold);
 			else return false;
@@ -595,7 +597,7 @@ public class NETS {
 	
 	public double neighboringSetDist(ArrayList<Short> c1, ArrayList<Short> c2) {
 		double ss = slideZero;
-		double cellIdxDist = (c1.size() == dim ? neighCellFullDimIdxDist : neighCellIdxDist);
+		double cellIdxDist = (c1.size() == dimension ? neighCellFullDimIdxDist : neighCellIdxDist);
 		double threshold = getSquare(cellIdxDist);
 		for(int k = 0; k<c1.size(); k++) {
 			ss += getSquare((int)getResultHelper(c1.get(k), c2.get(k)));
@@ -607,7 +609,7 @@ public class NETS {
 	
 	public boolean neighboringSet(ArrayList<Short> c1, ArrayList<Short> c2) {
 		double ss = slideZero;
-		double cellIdxDist = (c1.size() == dim ? neighCellFullDimIdxDist : neighCellIdxDist);
+		double cellIdxDist = (c1.size() == dimension ? neighCellFullDimIdxDist : neighCellIdxDist);
 		double threshold =getSquare(cellIdxDist);
 		for(int k = 0; k<c1.size(); k++) {
 			ss += getSquare((int)getResultHelper(c1.get(k), c2.get(k)));

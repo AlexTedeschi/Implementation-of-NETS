@@ -58,7 +58,7 @@ public class testBase {
 			itr++;
 		} while(itr <nW+nS-1);
 		
-		printInfo(itr, dataset, detector.dimLength, detector.subDimLength);
+		printInfo(itr, dataset, detector.dimension_Length, detector.subDimension_Length);
 		mesureThread.stop();
 	}
 	
